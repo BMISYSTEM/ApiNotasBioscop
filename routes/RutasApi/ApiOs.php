@@ -9,4 +9,6 @@ function ApiOs()
     Route::post('/updateos',[OsController::class,'updateos']);
     Route::get('/deleteos',[OsController::class,'deleteos']);
     Route::get('/indexos',[OsController::class,'indexos']);
+    Route::get('/resumenos',[OsController::class,'getResumen']);
+
 }

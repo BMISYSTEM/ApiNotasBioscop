@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Os;
 use App\Http\Controllers\Controller;
 use App\Models\OsApuntamiento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 // interfaz 
@@ -21,7 +22,7 @@ interface OsApuntamientoInterfaz
      * 
      * @return array
      */
-    public function newApuntamientoOs(  int $id_user,
+    public function newApuntamientoOs( 
                                         int $id_os,
                                         int $id_estado,
                                         string $nota,
@@ -59,7 +60,7 @@ interface OsApuntamientoInterfaz
 // implementacion
 class OsApuntamientoImplement implements OsApuntamientoInterfaz
 {
-    public function newApuntamientoOs(  int $id_user,
+    public function newApuntamientoOs(
                                         int $id_os,
                                         int $id_estado,
                                         string $nota,
@@ -67,6 +68,7 @@ class OsApuntamientoImplement implements OsApuntamientoInterfaz
                                         string $hora):array
     {
         try {
+            $id_user = Auth::user()->id;
             $apuntamiento = OsApuntamiento::create([
                 'id_user' => $id_user,
                 'id_os' => $id_os,
@@ -113,7 +115,7 @@ class OsApuntamientoImplement implements OsApuntamientoInterfaz
         try {
             $apuntamientos = DB::select('
             select 
-            ap.nota,ap.fecha,ap.hora,ap.id_os,ap.id_user,ap.id_estado,
+            ap.nota,ap.fecha,ap.hora,ap.id_os,ap.id_user,ap.id_estado,ap.id as id_apunte,
             u.name as nombre_usuario,
             e.nombre as nombre_estado,
             e.id,e.color
@@ -121,7 +123,7 @@ class OsApuntamientoImplement implements OsApuntamientoInterfaz
             inner join users u on ap.id_user = u.id
             inner join os o on ap.id_os = o.id
             inner join estados e on ap.id_estado = e.id
-            where ap.id_os = '.$id_os.'
+            where ap.id_os = '.$id_os.' order by ap.fecha desc
             ');
             return ['succes' => $apuntamientos];
         } catch (\Throwable $th) {
@@ -142,7 +144,6 @@ class OsApuntamientoController extends Controller
     {
         $request = $request->validate(
             [
-                'id_user'   => 'required|exists:users,id',
                 'id_os'     => 'required|exists:os,id',
                 'id_estado' => 'required|exists:estados,id',
                 'nota'      => 'required|min:10|max:500',
@@ -150,13 +151,11 @@ class OsApuntamientoController extends Controller
                 'hora'      => 'required'
             ],
             [
-                'id_user.required' => 'El campo id_user es obligatorio',
                 'id_os.required' => 'El campo id_os es obligatorio',
                 'id_estado.required' => 'El campo id_estado es obligatorio',
                 'nota.required' => 'El campo nota es obligatorio',
                 'fecha.required' => 'El campo fecha es obligatorio',
                 'hora.required' => 'El campo hora es obligatorio',
-                'id_user.exists' => 'El id_user no exite',
                 'id_os.exists' => 'El id_os no exite',
                 'id_estado.exists' => 'El id_estado no exite',
                 'nota.min' => 'La nota requiere minimo 10 caracteres',
@@ -165,8 +164,7 @@ class OsApuntamientoController extends Controller
                 'hora.required'      => 'El campo hora es obligatorio'
             ]
         );
-        $estatus = $this->apuntamiento->newApuntamientoOs(  $request['id_user'],
-                                                            $request['id_os'],
+        $estatus = $this->apuntamiento->newApuntamientoOs(  $request['id_os'],
                                                             $request['id_estado'],
                                                             $request['nota'],
                                                             $request['fecha'],

@@ -1,10 +1,11 @@
 <?php
 
-
+use App\Http\Controllers\Documentacion\DocumentacionController;
+use App\Http\Controllers\Estados\EstadosController;
+use App\Http\Controllers\Permisos\PermisosController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Os\OsApuntamientoController;
-use App\Http\Controllers\User\UserController;
-
+use App\Http\Controllers\Project\ProjectController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -16,6 +17,9 @@ require_once __DIR__ . '/RutasApi/ApiEstados.php';
 require_once __DIR__ . '/RutasApi/ApiClientes.php';
 require_once __DIR__ . '/RutasApi/ApiOs.php';
 require_once __DIR__ . '/RutasApi/ApiUser.php';
+require_once __DIR__ . '/RutasApi/ApiApuntamientos.php';
+require_once __DIR__ . '/RutasApi/ApiAreas.php';
+require_once __DIR__ . '/RutasApi/ApiRoles.php';
 
 
  /*
@@ -27,6 +31,18 @@ require_once __DIR__ . '/RutasApi/ApiUser.php';
 | La seguridad por medio del Bearer Token o tener un Token almacenado en la tabla personal_token
 */
 Route::middleware('auth:sanctum')->group(function(){
+    /*
+    |--------------------------------------------------------------------------
+    | Enrutadores refrentes a Areas 
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('Areas')->group(ApiAreas());
+    /*
+    |--------------------------------------------------------------------------
+    | Enrutadores refrentes a Roles
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('Roles')->group(ApiRoles());
       /*
     |--------------------------------------------------------------------------
     | Enrutadores refrentes a login, solo cierre de session el login es publico
@@ -68,15 +84,49 @@ Route::middleware('auth:sanctum')->group(function(){
     | Enrutadores refrentes a Apuntamiento de OS
     |--------------------------------------------------------------------------
     */
-    Route::post('/newapuntamiento',[OsApuntamientoController::class,'newApuntamientoOs']);
-    Route::post('/updateapuntamientoos',[OsApuntamientoController::class,'updateApuntamientoOs']);
-    Route::get('/deleteapuntamientoos',[OsApuntamientoController::class,'deleteApuntamientoOs']);
-    Route::get('/indexapuntamientoos',[OsApuntamientoController::class,'indexApuntamientoOS']);
+    Route::prefix('Apuntamientos')->group(ApiApuntamientos());
+     /*
+    |--------------------------------------------------------------------------
+    | Enrutadores refrentes a projectos
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/newproject',[ProjectController::class,'newProject']);
+    /*
+    |--------------------------------------------------------------------------
+    | Enrutadores refrentes a documentacion
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/createmodulo',[DocumentacionController::class,'createModulo']);
+    Route::post('/createdocument',[DocumentacionController::class,'createDocumentacion']);
+    Route::post('/updatemodulo',[DocumentacionController::class,'updateModulo']);
+    Route::post('/updatedocumentacion',[DocumentacionController::class,'updateDocumentacion']);
+    Route::get('/allmodulos',[DocumentacionController::class,'allModulos']);
+    Route::get('/alldocumentacion',[DocumentacionController::class,'allDocumentacion']);
+    Route::get('/deletemodulo',[DocumentacionController::class,'deleteModulo']);
+    Route::get('/deletedocumentacion',[DocumentacionController::class,'deleteDocumentacion']);
+
+      /*
+    |--------------------------------------------------------------------------
+    | Enrutadores refrentes a estados
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/createestado',[EstadosController::class,'newEstado']);
+    Route::get('/allestados',[EstadosController::class,'index']);
 });
 /**
 * Inicio de session
 */
 Route::post('/login',[LoginController::class,'login']);
-// Route::get('/inicio',[AuthController::class,'create']);
+/**
+ * En cazo de necesitarse se pueden optimizar las rutas desde el despliegue 
+ */
+Route::get('/config',function(){
+  Artisan::call('optimize');
+});
 
+Route::post('/newpermisos',[PermisosController::class,'newPermiso']);
+Route::post('/updatepermisos',[PermisosController::class,'updatePermiso']);
+Route::post('/deletepermisos',[PermisosController::class,'deletePermiso']);
+Route::get('/indexpermisos',[PermisosController::class,'indexPermios']);
+Route::get('/findpermisos',[PermisosController::class,'findPermisos']);
 

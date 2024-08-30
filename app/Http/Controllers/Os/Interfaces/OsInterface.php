@@ -26,6 +26,14 @@ interface OsInterface
      * @return array
      */
     public function deleteOs(int $id) : array;
-
+    
+    /** Devuelve todas las os
+     * @return array
+     */
     public function indexOs(): array;
+
+    /** devuelve os pendientes, os terminadas
+     * @return array
+     */
+    public function getResumen(): array;
 }

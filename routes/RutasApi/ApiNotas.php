@@ -14,6 +14,10 @@ function ApiNotas()
      */
     Route::get('/indexnota',[NotasController::class,'index']);
     /**
+     * Consulta todas las notas de un mes deteminado que se pasa por qeryparameter para el gantt
+     */
+    Route::get('/indexnotagantt',[NotasController::class,'indexGantt']);
+    /**
      *  Actualiza la nota que se envia mediante id del post
      */
     Route::post('/updatenota',[NotasController::class,'update']);
@@ -21,4 +25,13 @@ function ApiNotas()
      * Elimina una nota en la base de datos
      */
     Route::get('/deletenota',[NotasController::class,'delete']);
+    /**
+     * Resumen de notas notas pendientes, reuniones, 
+     */
+    Route::get('/notasresumen',[NotasController::class,'getResumen']);
+    /**
+     * Confirmacion de notas 
+     */
+    Route::post('/confirnota',[NotasController::class,'confirmaNota']);
+
 }

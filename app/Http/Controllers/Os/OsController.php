@@ -58,7 +58,7 @@ class OsImplement implements OsInterface
             $os = DB::select('
             select o.id,o.descripcion,o.user_id,o.estado_id,o.id_cliente,
                     u.name as consultor,
-                    e.nombre as estado,
+                    e.nombre as estado,e.color,
                     c.nombre as empresa 
             from os o 
             inner join users u on o.user_id = u.id
@@ -68,6 +68,17 @@ class OsImplement implements OsInterface
             return ['succes'=> $os];
         } catch (\Throwable $th) {
             return ['error' => 'Error inesperado en el servidor '. $th];
+        }
+    }
+
+    public function getResumen(): array
+    {
+        try {
+            $osActiva = DB::select('select count(*) as osActivas from os where activo = 1');
+            $osInactiva = DB::select('select count(*) as osInactiva from os where activo = 0');
+            return ['succes'=>[$osActiva[0],$osInactiva[0]]];
+        } catch (\Throwable $th) {
+            return ['error'=> 'Error inesperado en el servidor '.$th];
         }
     }
 }
@@ -144,6 +155,12 @@ class OsController extends Controller
     public function indexOs(): object
     {
         $estatus = $this->os->indexOs();
+        return response()->json($estatus,array_key_exists('error',$estatus) ? 500 : 200);
+    }
+
+    public function getResumen()
+    {
+        $estatus = $this->os->getResumen();
         return response()->json($estatus,array_key_exists('error',$estatus) ? 500 : 200);
     }
 }

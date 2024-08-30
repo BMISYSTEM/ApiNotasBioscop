@@ -4,12 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\login;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\permiso;
 use Illuminate\Support\Facades\Auth;
-use League\CommonMark\Node\Block\Document;
-use App\Http\Interfaces\LoginInterface;
-use PhpParser\Node\Expr\Cast\Object_;
+
+
 
 class LoginImplementacion implements LoginInterface
 {
@@ -20,13 +18,41 @@ class LoginImplementacion implements LoginInterface
                 return ['error' => 'El email o el password son incorrectos'];
             }
             $user = Auth::user();
+            $userRol = Auth::user()->id_rol;
+            $permisos = permiso::where('id_rol',$userRol)->get();
             $token = $user->createToken('token')->plainTextToken;
             return [
                 'succes' => 'Autenticacion con exito',
-                'token' => $token
+                'token' => $token,
+                'foto' => $user->foto,
+                'rol'=>$userRol,
+                'permisos'=>$permisos 
             ];
-        } catch (Exception) {
+        } catch (\Throwable $th) {
             return ['error'=>'Error interno'];
+        }
+    }
+
+    public function index(): array
+    {
+        try {
+            $user = Auth::user();
+            return ['succes'=>$user];
+        } catch (\Throwable $th) {
+            return ['error'=>$th];
+        }
+    }
+    public function userPermisos(): array
+    {
+        try {
+            $user = Auth::user();
+            $permisos = permiso::where('id_rol',$user->id_rol)->get();
+            return [
+                'succes'=>$user,
+                'permisos' =>$permisos
+            ];
+        } catch (\Throwable $th) {
+            return ['error'=>$th];
         }
     }
 }
@@ -59,5 +85,16 @@ class LoginController extends Controller
     {
         $status = $this->LoginUser->login($request);
         return response()->json($status,array_key_exists('error',$status) ? 422 :200 );
+    }
+
+    public function index():object
+    {
+        $status = $this->LoginUser->index();
+        return response()->json($status,array_key_exists('error',$status) ? 422 :200 ); 
+    }
+    public function userPermisos():object
+    {
+        $status = $this->LoginUser->userPermisos();
+        return response()->json($status,array_key_exists('error',$status) ? 422 :200 ); 
     }
 }
