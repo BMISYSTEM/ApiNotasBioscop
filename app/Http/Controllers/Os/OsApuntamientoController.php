@@ -169,6 +169,9 @@ class OsApuntamientoController extends Controller
                                                             $request['nota'],
                                                             $request['fecha'],
                                                             $request['hora']);
+        DB::update('update os set estado_id ='.$request['id_estado'].' where id = '.$request['id_os']);
+        
+        
         return response()->json($estatus,array_key_exists('error',$estatus) ? 500 : 200);
     }
     public function updateApuntamientoOs(Request $request):object
